@@ -1,0 +1,283 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+char stack[MAX][20];
+int top = -1;
+
+void push(char *s)   { strcpy(stack[++top], s); }
+void pop()           { if (top >= 0) top--; }
+char *peek()         { return stack[top]; }
+
+void printStack() {
+    printf("Stack: [ ");
+    for (int i = 0; i <= top; i++) printf("%s ", stack[i]);
+    printf("]");
+}
+
+void printInput(char toks[][20], int pos, int n) {
+    printf("Input: [ ");
+    for (int i = pos; i < n; i++) printf("%s ", toks[i]);
+    printf("]");
+}
+
+int main() {
+    printf("=== Q8: Ambiguity Removal and Shift-Reduce Parsing ===\n\n");
+
+    printf("Original Ambiguous Grammar:\n");
+    printf("  E -> E - E | E / E | id\n\n");
+
+    printf("Ambiguity in 'id - id / id':\n");
+    printf("  Parse Tree 1: (id - id) / id  [- first]\n");
+    printf("  Parse Tree 2:  id - (id / id)  [/ first]\n");
+    printf("  => Two different parse trees => AMBIGUOUS\n\n");
+
+    printf("Redesigned Unambiguous Grammar:\n");
+    printf("  Rule 1: E -> E - T   (- is left-associative, lower precedence)\n");
+    printf("  Rule 2: E -> T\n");
+    printf("  Rule 3: T -> T / F   (/ is left-associative, higher precedence)\n");
+    printf("  Rule 4: T -> F\n");
+    printf("  Rule 5: F -> id\n\n");
+
+    printf("Associativity: Both - and / are LEFT-associative\n");
+    printf("Precedence:    / > -\n\n");
+
+    /* Tokens for: id - id / id $ */
+    char tokens[][20] = {"id", "-", "id", "/", "id", "$"};
+    int n = 6, pos = 0, step = 1;
+
+    push("$");
+
+    printf("Input: id - id / id\n\n");
+    printf("%-5s %-35s %-25s %-25s\n", "Step", "Stack", "Input", "Action");
+    printf("----------------------------------------------------------------------------------\n");
+
+    while (1) {
+        printf("%-5d ", step++);
+        printStack();
+        printf("  ");
+        printInput(tokens, pos, n);
+        printf("  ");
+
+        /* Reduce: F -> id */
+        if (strcmp(stack[top], "id") == 0) {
+            printf("Reduce  F -> id\n");
+            pop(); push("F");
+            continue;
+        }
+
+        /* Reduce: T -> F */
+        if (strcmp(stack[top], "F") == 0) {
+            /* Reduce T->F only if top-1 is not / (no pending T / in progress) */
+            if (top == 0 || strcmp(stack[top-1], "/") != 0) {
+                printf("Reduce  T -> F\n");
+                pop(); push("T");
+                continue;
+            }
+        }
+
+        /* Reduce: T -> T / F */
+        if (top >= 2 &&
+            strcmp(stack[top],   "F") == 0 &&
+            strcmp(stack[top-1], "/") == 0 &&
+            strcmp(stack[top-2], "T") == 0) {
+            printf("Reduce  T -> T / F\n");
+            pop(); pop(); pop();
+            push("T");
+            continue;
+        }
+
+        /* Reduce: E -> T  (only if lookahead is not / ) */
+        if (strcmp(stack[top], "T") == 0) {
+            if (strcmp(tokens[pos], "/") != 0) {
+                /* Check top-1 is not - (i.e., not in the middle of E - T) */
+                if (top == 0 || strcmp(stack[top-1], "-") != 0) {
+                    printf("Reduce  E -> T\n");
+                    pop(); push("E");
+                    continue;
+                }
+            }
+        }
+
+        /* Reduce: E -> E - T */
+        if (top >= 2 &&
+            strcmp(stack[top],   "T") == 0 &&
+            strcmp(stack[top-1], "-") == 0 &&
+            strcmp(stack[top-2], "E") == 0) {
+            /* Reduce only if lookahead is not / */
+            if (strcmp(tokens[pos], "/") != 0) {
+                printf("Reduce  E -> E - T\n");
+                pop(); pop(); pop();
+                push("E");
+                continue;
+            }
+        }
+
+        /* Accept */
+        if (top == 1 &&
+            strcmp(stack[0], "$") == 0 &&
+            strcmp(stack[top], "E") == 0 &&
+            strcmp(tokens[pos], "$") == 0) {
+            printf("ACCEPT\n");
+            break;
+        }
+
+        /* Shift */
+        if (strcmp(tokens[pos], "$") != 0) {
+            printf("Shift   %s\n", tokens[pos]);
+            push(tokens[pos]);
+            pos++;
+        } else {
+            printf("ERROR: unexpected end of input\n");
+            break;
+        }
+    }
+
+    printf("\n=== Result: String Accepted ===\n");
+    printf("\nCorrect Parse: id - (id / id)  [/ applied first due to higher precedence]\n");
+    return 0;
+}
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+char stack[MAX][20];
+int top = -1;
+
+void push(char *s)   { strcpy(stack[++top], s); }
+void pop()           { if (top >= 0) top--; }
+char *peek()         { return stack[top]; }
+
+void printStack() {
+    printf("Stack: [ ");
+    for (int i = 0; i <= top; i++) printf("%s ", stack[i]);
+    printf("]");
+}
+
+void printInput(char toks[][20], int pos, int n) {
+    printf("Input: [ ");
+    for (int i = pos; i < n; i++) printf("%s ", toks[i]);
+    printf("]");
+}
+
+int main() {
+    printf("=== Q8: Ambiguity Removal and Shift-Reduce Parsing ===\n\n");
+
+    printf("Original Ambiguous Grammar:\n");
+    printf("  E -> E - E | E / E | id\n\n");
+
+    printf("Ambiguity in 'id - id / id':\n");
+    printf("  Parse Tree 1: (id - id) / id  [- first]\n");
+    printf("  Parse Tree 2:  id - (id / id)  [/ first]\n");
+    printf("  => Two different parse trees => AMBIGUOUS\n\n");
+
+    printf("Redesigned Unambiguous Grammar:\n");
+    printf("  Rule 1: E -> E - T   (- is left-associative, lower precedence)\n");
+    printf("  Rule 2: E -> T\n");
+    printf("  Rule 3: T -> T / F   (/ is left-associative, higher precedence)\n");
+    printf("  Rule 4: T -> F\n");
+    printf("  Rule 5: F -> id\n\n");
+
+    printf("Associativity: Both - and / are LEFT-associative\n");
+    printf("Precedence:    / > -\n\n");
+
+    /* Tokens for: id - id / id $ */
+    char tokens[][20] = {"id", "-", "id", "/", "id", "$"};
+    int n = 6, pos = 0, step = 1;
+
+    push("$");
+
+    printf("Input: id - id / id\n\n");
+    printf("%-5s %-35s %-25s %-25s\n", "Step", "Stack", "Input", "Action");
+    printf("----------------------------------------------------------------------------------\n");
+
+    while (1) {
+        printf("%-5d ", step++);
+        printStack();
+        printf("  ");
+        printInput(tokens, pos, n);
+        printf("  ");
+
+        /* Reduce: F -> id */
+        if (strcmp(stack[top], "id") == 0) {
+            printf("Reduce  F -> id\n");
+            pop(); push("F");
+            continue;
+        }
+
+        /* Reduce: T -> F */
+        if (strcmp(stack[top], "F") == 0) {
+            /* Reduce T->F only if top-1 is not / (no pending T / in progress) */
+            if (top == 0 || strcmp(stack[top-1], "/") != 0) {
+                printf("Reduce  T -> F\n");
+                pop(); push("T");
+                continue;
+            }
+        }
+
+        /* Reduce: T -> T / F */
+        if (top >= 2 &&
+            strcmp(stack[top],   "F") == 0 &&
+            strcmp(stack[top-1], "/") == 0 &&
+            strcmp(stack[top-2], "T") == 0) {
+            printf("Reduce  T -> T / F\n");
+            pop(); pop(); pop();
+            push("T");
+            continue;
+        }
+
+        /* Reduce: E -> T  (only if lookahead is not / ) */
+        if (strcmp(stack[top], "T") == 0) {
+            if (strcmp(tokens[pos], "/") != 0) {
+                /* Check top-1 is not - (i.e., not in the middle of E - T) */
+                if (top == 0 || strcmp(stack[top-1], "-") != 0) {
+                    printf("Reduce  E -> T\n");
+                    pop(); push("E");
+                    continue;
+                }
+            }
+        }
+
+        /* Reduce: E -> E - T */
+        if (top >= 2 &&
+            strcmp(stack[top],   "T") == 0 &&
+            strcmp(stack[top-1], "-") == 0 &&
+            strcmp(stack[top-2], "E") == 0) {
+            /* Reduce only if lookahead is not / */
+            if (strcmp(tokens[pos], "/") != 0) {
+                printf("Reduce  E -> E - T\n");
+                pop(); pop(); pop();
+                push("E");
+                continue;
+            }
+        }
+
+        /* Accept */
+        if (top == 1 &&
+            strcmp(stack[0], "$") == 0 &&
+            strcmp(stack[top], "E") == 0 &&
+            strcmp(tokens[pos], "$") == 0) {
+            printf("ACCEPT\n");
+            break;
+        }
+
+        /* Shift */
+        if (strcmp(tokens[pos], "$") != 0) {
+            printf("Shift   %s\n", tokens[pos]);
+            push(tokens[pos]);
+            pos++;
+        } else {
+            printf("ERROR: unexpected end of input\n");
+            break;
+        }
+    }
+
+    printf("\n=== Result: String Accepted ===\n");
+    printf("\nCorrect Parse: id - (id / id)  [/ applied first due to higher precedence]\n");
+    return 0;
+}
