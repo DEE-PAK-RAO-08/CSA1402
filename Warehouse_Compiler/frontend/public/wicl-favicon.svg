@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="w-grad" x1="3" y1="6" x2="29" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="7" fill="url(#bg-grad)"/>
+  <!-- Subtle border -->
+  <rect width="32" height="32" rx="7" fill="none" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.4"/>
+
+  <!-- W shape -->
+  <polyline
+    points="3,6 8,24 16,12 24,24 29,6"
+    stroke="url(#w-grad)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <!-- Circuit node dots -->
+  <circle cx="3"  cy="6"  r="2"   fill="#22d3ee"/>
+  <circle cx="29" cy="6"  r="2"   fill="#3b82f6"/>
+  <circle cx="16" cy="12" r="1.8" fill="#22d3ee" fill-opacity="0.9"/>
+  <circle cx="8"  cy="24" r="1.8" fill="#3b82f6" fill-opacity="0.8"/>
+  <circle cx="24" cy="24" r="1.8" fill="#3b82f6" fill-opacity="0.8"/>
+</svg>
